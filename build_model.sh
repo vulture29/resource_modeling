@@ -18,7 +18,7 @@ web_host_ip=$2
 echo "Start building resource model..."
 
 # control cpu cgroup in the server
-for i in {1..99..1}
+for i in {1..99..0.1}
   do
     echo "Test for performance under cgroup $i..."
     root_command="
@@ -59,3 +59,4 @@ for i in {1..99..1}
 
 # build resource model
 cd /home/centos/resource_model
+python resource_model.py
