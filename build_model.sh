@@ -55,7 +55,7 @@ for i in {1..99..0.1}
       then
         break
       fi
-    done
+  done
 
 # build resource model
 cd /home/centos/resource_model
