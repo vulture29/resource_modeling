@@ -18,7 +18,7 @@ web_host_ip=$2
 echo "Start building resource model..."
 
 # control cpu cgroup in the server
-for i in {1..99..0.1}
+for i in {1..99..1}
   do
     echo "Test for performance under cgroup $i..."
     root_command="
@@ -45,12 +45,15 @@ for i in {1..99..0.1}
     user_command="
     sudo service cgconfig restart
     sudo cgclassify -g cpu:limitcpu \$(pidof $app_name)
+    /home/centos/resource_model/monitor_pressure.sh $i
     "
     ssh "centos@$web_host_ip" "$user_command" >> /home/centos/resource_model/res_model_log
 
     perf_path=$(make emulator | awk 'NR==4{ print $4 ; exit }')
     slo=$(cat /home/centos/RUBiS/${perf_path}perf.html | grep '<TR><TD><div align=left><B>Total</div></B><TD><div align=right>' | egrep -o [0-9]+ | sed -n '10 p')
-    echo "$i $slo" >> /home/centos/resource_model/res_data
+    scp centos@$web_host_ip:/home/centos/resource_model/pressure_data /home/centos/resource_model/pressure_data
+    pressure=$(python /home/centos/resource_model/calculate_pressure.py)
+    echo "$pressure $slo" >> /home/centos/resource_model/res_data
     if [ "$slo" -lt 50 ]
       then
         break

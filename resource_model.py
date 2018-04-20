@@ -9,7 +9,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.metrics import mean_squared_error
 
 # read file
-with open("res_data", "r") as ins:
+with open("/home/centos/resource_model/res_data", "r") as ins:
     read_x = []
     read_y = []
     for line in ins:
