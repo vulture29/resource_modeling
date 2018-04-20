@@ -15,7 +15,7 @@ for item in ori_data:
         data1.append(item)
 
 flag = True
-for x in reversed(data1):
+for item in reversed(data1):
     if flag and item == 0:
         continue
     else:
