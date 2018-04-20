@@ -1,12 +1,25 @@
-count = 0
-sum_pressure = 0
+ori_data = []
+data1 = []
+data2 = []
 
 with open("/home/centos/resource_model/pressure_data", "r") as ins:
     for line in ins:
-        if len(line) > 0:
-            pressure = int(line)
-            if pressure > 0:
-                count += 1
-                sum_pressure += pressure
+        ori_data.append(int(line))
 
-print(1.0 * sum_pressure / count)
+flag = True
+for item in ori_data:
+    if flag and item == 0:
+        continue
+    else:
+        flag = False
+        data1.append(item)
+
+flag = True
+for x in reversed(data1):
+    if flag and item == 0:
+        continue
+    else:
+        flag = False
+        data2.append(item)
+
+print(1.0 * sum(data2) / len(data2))
