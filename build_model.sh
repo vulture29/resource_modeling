@@ -40,17 +40,18 @@ for i in {1..99..1}
             }
     }' > /etc/cgconfig.conf
     "
-    ssh "root@$web_host_ip" "$root_command" >> /home/centos/resource_model/res_model_log
+    ssh "root@$web_host_ip" "$root_command"
 
     user_command="
     sudo service cgconfig restart
     sudo cgclassify -g cpu:limitcpu \$(pidof $app_name)
-    /home/centos/resource_model/monitor_pressure.sh $i
+    nohup /home/centos/resource_model/monitor_pressure.sh $i > /dev/null 2>&1 &
     "
-    ssh "centos@$web_host_ip" "$user_command" >> /home/centos/resource_model/res_model_log
+    ssh "centos@$web_host_ip" "$user_command"
 
     perf_path=$(make emulator | awk 'NR==4{ print $4 ; exit }')
     slo=$(cat /home/centos/RUBiS/${perf_path}perf.html | grep '<TR><TD><div align=left><B>Total</div></B><TD><div align=right>' | egrep -o [0-9]+ | sed -n '10 p')
+    ssh "centos@$web_host_ip" "sudo kill -9 $(ps aux | grep monitor_pressure.sh | awk '{ print $2 }')"
     scp centos@$web_host_ip:/home/centos/resource_model/pressure_data /home/centos/resource_model/pressure_data
     pressure=$(python /home/centos/resource_model/calculate_pressure.py)
     echo "$pressure $slo" >> /home/centos/resource_model/res_data
