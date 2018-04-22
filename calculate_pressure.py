@@ -2,7 +2,7 @@ ori_data = []
 data1 = []
 data2 = []
 
-with open("/home/centoslive/resource_model/pressure_data", "r") as ins:
+with open("~/resource_model/pressure_data", "r") as ins:
     for line in ins:
         ori_data.append(int(line))
 
