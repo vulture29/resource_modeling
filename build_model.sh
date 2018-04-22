@@ -1,27 +1,22 @@
 #!/bin/bash
 
-# check parameters
-if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 app_name web_host_ip" >&2
-  exit 1
-fi
-
 # check and delete old file
-if [ -f "/home/centos/resource_model/res_data" ]; then
-  rm /home/centos/resource_model/res_data
+if [ -f "/home/centoslive/resource_model/res_data" ]; then
+  rm /home/centoslive/resource_model/res_data
 fi
 
-cd /home/centos/RUBiS
-vm_pid=$1
-kvm_host_ip=$2
+cd /home/centoslive/RUBiS
+kvm_host_ip="13.82.55.56"
+kvm_host_user="zhikangzhang"
+vm_pid="4136 4141"
 
 echo "Start building resource model..."
 
 # control cpu cgroup in the server
-for i in {10..99..1}
+for i in {20..100..1}
   do
     echo "Test for performance under cgroup $i..."
-    root_command="
+    user_command="
     echo 'mount {
             cpuset  = /cgroup/cpuset;
             cpu     = /cgroup/cpu;
@@ -35,32 +30,30 @@ for i in {10..99..1}
 
     group limitcpu{
             cpu {
-                    cpu.cfs_quota_us = ${i}0000;
-                    cpu.cfs_period_us = 1000000;
+                    cpu.cfs_quota_us = ${i}000;
+                    cpu.cfs_period_us = 100000;
             }
-    }' > /etc/cgconfig.conf
-    "
-    ssh "root@$kvm_host_ip" "$root_command"
-
-    user_command="
+    }' > ~/cgconfig.conf
+    sudo cp ~/cgconfig.conf /etc/cgconfig.conf
     sudo service cgconfig restart
     sudo cgclassify -g cpu:limitcpu $vm_pid
-    nohup /home/centos/resource_model/monitor_pressure.sh $i > /dev/null 2>&1 &
+    nohup /home/$kvm_host_user/resource_model/monitor_pressure.sh $i > /dev/null 2>&1 &
     "
-    ssh "centos@$kvm_host_ip" "$user_command"
+    ssh "$kvm_host_user@$kvm_host_ip" "$user_command"
 
     perf_path=$(make emulator | awk 'NR==4{ print $4 ; exit }')
-    slo=$(cat /home/centos/RUBiS/${perf_path}perf.html | grep '<TR><TD><div align=left><B>Total</div></B><TD><div align=right>' | egrep -o [0-9]+ | sed -n '10 p')
-    ssh "centos@$kvm_host_ip" "sudo kill -9 \$(ps aux | grep monitor_pressure.sh | awk '{ print \$2 }')"
-    scp centos@$kvm_host_ip:/home/centos/resource_model/pressure_data /home/centos/resource_model/pressure_data
-    pressure=$(python /home/centos/resource_model/calculate_pressure.py)
-    echo "$pressure $slo" >> /home/centos/resource_model/res_data
-    if [ "$slo" -lt 50 ]
+    slo=$(cat /home/centoslive/RUBiS/${perf_path}perf.html | grep '<TR><TD><div align=left><B>Total</div></B><TD><div align=right>' | egrep -o [0-9]+ | sed -n '10 p')
+    ssh "$kvm_host_user@$kvm_host_ip" "sudo kill -9 \$(ps aux | grep monitor_pressure.sh | awk '{ print \$2 }')"
+    scp $kvm_host_user@$kvm_host_ip:/home/$kvm_host_user/resource_model/pressure_data /home/centoslive/resource_model/pressure_data
+    pressure=$(python /home/centoslive/resource_model/calculate_pressure.py)
+    echo "$pressure $slo" >> /home/centoslive/resource_model/res_data
+    if [ "$slo" -lt 200 ]
       then
+        echo "No SLO violation!"
         break
       fi
   done
 
 # build resource model
-cd /home/centos/resource_model
-python resource_model.py
+cd /home/centoslive/resource_model
+# python resource_model.py

@@ -9,12 +9,12 @@ from sklearn.pipeline import make_pipeline
 from sklearn.metrics import mean_squared_error
 
 # read file
-with open("/home/centos/resource_model/res_data", "r") as ins:
+with open("res_data", "r") as ins:
     read_x = []
     read_y = []
     for line in ins:
-        read_x.append(int(line.split()[0]))
-        read_y.append(int(line.split()[1]))
+        read_x.append(float(line.split()[0]))
+        read_y.append(float(line.split()[1]))
 
 if(len(read_x) < 5):
 	print("not enough datapoint. Fail to build model.")
@@ -36,7 +36,7 @@ for index,y in enumerate(read_y):
 	else:
 		ori_y.append(y)
 x = np.asarray(ori_x)
-x_plot = np.linspace(0, 30, 300)
+x_plot = np.linspace(50, 93, 400)
 
 # generate points and keep a subset of them
 y = np.asarray(ori_y)
@@ -72,9 +72,9 @@ model_str = pickle.dumps(save_model)
 with open("resource_model", "w") as text_file:
     text_file.write(model_str)
 
-plt.ylim(ymin=0)
+plt.ylim(ymin=0, ymax=2000)
 plt.suptitle('cpu resource model', fontsize=16)
-plt.legend(loc='lower left')
-plt.xlabel('Limited CPU resource usage(%)')
+plt.legend(loc='upper left')
+plt.xlabel('CPU resource pressure(%)')
 plt.ylabel('SLO - Average Response Time (ms)')
-# plt.show()
+plt.show()
