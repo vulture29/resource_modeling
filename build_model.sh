@@ -8,7 +8,7 @@ fi
 cd ~/RUBiS
 kvm_host_ip="13.82.55.56"
 kvm_host_user="zhikangzhang"
-vm_pid="4136 4141"
+vm_pid="3944 3949"
 
 echo "Start building resource model..."
 
